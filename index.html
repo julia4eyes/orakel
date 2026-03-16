@@ -1,0 +1,992 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webwinkel – Juliaś Angelflowers</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+font-family:Arial;
+margin:0;
+background:linear-gradient(to bottom,#f5f0f8,#e0d7f1);
+color:#4b3b6c;
+min-height:100vh;
+display:flex;
+flex-direction:column;
+}
+
+/* HEADER */
+
+header{
+background:#111;
+color:white;
+padding:20px 40px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+}
+
+.cart-btn{
+cursor:pointer;
+background:#222;
+padding:8px 16px;
+border-radius:6px;
+transition:background 0.3s ease;
+}
+
+.cart-btn:hover{
+background:#444;
+}
+
+/* FILTER BAR */
+
+.filters{
+max-width:1200px;
+margin:auto;
+padding:20px;
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+align-items:center;
+}
+
+.filters button{
+background:#333;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+transition:background 0.3s ease;
+}
+
+.filters button:hover{
+background:#555;
+}
+
+.filters input{
+padding:8px;
+border-radius:6px;
+border:1px solid #ccc;
+flex:1;
+min-width:200px;
+}
+
+/* CONTAINER */
+
+.container{
+flex:1;
+max-width:1200px;
+margin:auto;
+padding:20px;
+width:100%;
+}
+
+/* PRODUCT GRID */
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fill,260px);
+gap:30px;
+justify-content:center;
+}
+
+/* PRODUCT CARD */
+
+.product{
+background:white;
+border-radius:10px;
+overflow:hidden;
+box-shadow:0 8px 20px rgba(0,0,0,0.1);
+display:flex;
+flex-direction:column;
+width:260px;
+transition:transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product:hover{
+transform:translateY(-5px);
+box-shadow:0 15px 30px rgba(0,0,0,0.15);
+}
+
+.product-img-container{
+position:relative;
+width:100%;
+height:200px;
+overflow:hidden;
+cursor:pointer;
+}
+
+.product-img-container img{
+width:100%;
+height:100%;
+object-fit:cover;
+transition:transform 0.5s ease;
+}
+
+.product-img-container:hover img{
+transform:scale(1.1);
+}
+
+/* Voorraad indicator */
+.stock-badge{
+position:absolute;
+top:10px;
+right:10px;
+background:#4CAF50;
+color:white;
+padding:4px 8px;
+border-radius:4px;
+font-size:12px;
+font-weight:bold;
+z-index:2;
+}
+
+.stock-badge.low-stock{
+background:#ff9800;
+}
+
+.stock-badge.out-of-stock{
+background:#f44336;
+}
+
+.product-info{
+padding:20px;
+display:flex;
+flex-direction:column;
+flex-grow:1;
+text-align:center;
+}
+
+.product h3{
+margin:0;
+font-size:18px;
+}
+
+.description{
+font-size:13px;
+margin-top:12px;
+margin-bottom:12px;
+min-height:40px;
+color:#666;
+}
+
+.price{
+font-size:20px;
+font-weight:bold;
+margin-bottom:12px;
+color:#4b3b6c;
+}
+
+.product-info button{
+margin-top:auto;
+background:#4b3b6c;
+transition:background 0.3s ease;
+}
+
+.product-info button:hover{
+background:#6b4b9c;
+}
+
+.product-info button:disabled{
+background:#ccc;
+cursor:not-allowed;
+}
+
+button{
+background:black;
+color:white;
+border:none;
+padding:10px 16px;
+border-radius:6px;
+cursor:pointer;
+transition:background 0.3s ease;
+}
+
+button:hover{
+background:#333;
+}
+
+/* NOTIFICATIE */
+
+.notification{
+position:fixed;
+top:120px;
+right:20px;
+background:#4CAF50;
+color:white;
+padding:15px 25px;
+border-radius:8px;
+box-shadow:0 5px 15px rgba(0,0,0,0.3);
+z-index:3000;
+transform:translateX(400px);
+transition:transform 0.3s ease;
+}
+
+.notification.show{
+transform:translateX(0);
+}
+
+.notification.error{
+background:#f44336;
+}
+
+.notification.warning{
+background:#ff9800;
+}
+
+/* IMAGE OVERLAY */
+.image-overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.95);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:2000;
+cursor:pointer;
+backdrop-filter:blur(5px);
+}
+
+.image-overlay.active{
+display:flex;
+animation:fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn{
+from{opacity:0;}
+to{opacity:1;}
+}
+
+.overlay-content{
+position:relative;
+max-width:90%;
+max-height:90%;
+animation:zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn{
+from{transform:scale(0.9); opacity:0;}
+to{transform:scale(1); opacity:1;}
+}
+
+.overlay-content img{
+width:100%;
+height:100%;
+object-fit:contain;
+border:3px solid white;
+border-radius:5px;
+box-shadow:0 0 30px rgba(255,255,255,0.2);
+}
+
+.close-overlay{
+position:absolute;
+top:-40px;
+right:0;
+color:white;
+font-size:30px;
+cursor:pointer;
+background:rgba(255,255,255,0.2);
+width:40px;
+height:40px;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+transition:all 0.3s ease;
+}
+
+.close-overlay:hover{
+background:rgba(255,255,255,0.4);
+transform:rotate(90deg);
+}
+
+/* CART */
+
+.cart{
+position:fixed;
+left:0;
+top:0;
+width:100%;
+height:100%;
+background:white;
+padding:40px;
+display:none;
+overflow:auto;
+z-index:1000;
+animation:slideIn 0.3s ease;
+}
+
+@keyframes slideIn{
+from{transform:translateX(-100%);}
+to{transform:translateX(0);}
+}
+
+.cart.open{
+display:block;
+}
+
+.cart-header{
+display:flex;
+justify-content:space-between;
+margin-bottom:30px;
+flex-wrap:wrap;
+gap:15px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+padding:12px;
+border-bottom:1px solid #ddd;
+text-align:left;
+}
+
+th{
+background:#f2f2f2;
+}
+
+.qty button{
+padding:4px 8px;
+margin:0 5px;
+}
+
+.total{
+font-size:22px;
+font-weight:bold;
+margin:20px 0;
+color:#4b3b6c;
+}
+
+.checkout{
+background:#4CAF50;
+margin-top:10px;
+}
+
+.checkout:hover{
+background:#45a049;
+}
+
+.clear{
+background:#f44336;
+margin-top:10px;
+}
+
+.clear:hover{
+background:#d32f2f;
+}
+
+/* SORTEER BAR */
+
+.sort-bar{
+max-width:1200px;
+margin:10px auto;
+padding:0 20px;
+display:flex;
+justify-content:flex-end;
+gap:10px;
+}
+
+.sort-bar select{
+padding:8px;
+border-radius:6px;
+border:1px solid #ccc;
+background:white;
+cursor:pointer;
+}
+
+/* LOADING ANIMATIE */
+
+.loading{
+display:inline-block;
+width:20px;
+height:20px;
+border:3px solid #f3f3f3;
+border-top:3px solid #4b3b6c;
+border-radius:50%;
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+0%{transform:rotate(0deg);}
+100%{transform:rotate(360deg);}
+}
+
+footer{
+text-align:center;
+padding:20px;
+margin-top:40px;
+background:#eee;
+}
+
+/* MOBILE */
+
+@media (max-width:600px){
+
+.products{
+grid-template-columns:1fr;
+justify-items:center;
+}
+
+.product{
+width:90%;
+}
+
+.filters{
+flex-direction:column;
+align-items:stretch;
+}
+
+.filters input{
+width:100%;
+}
+
+.sort-bar{
+justify-content:center;
+}
+
+.cart{
+padding:20px;
+}
+
+table{
+font-size:14px;
+}
+
+th,td{
+padding:8px;
+}
+
+.qty button{
+padding:2px 6px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<h2>✨ Julia's Bloemenkiosk Webwinkel</h2>
+
+<div class="cart-btn" onclick="toggleCart()">
+🛒 Winkelwagen (<span id="count">0</span>)
+</div>
+
+</header>
+
+<!-- Sorteer balk -->
+<div class="sort-bar">
+<label for="sort">Sorteer op:</label>
+<select id="sort" onchange="sortProducts(this.value)">
+<option value="default">Standaard</option>
+<option value="price-low">Prijs: Laag naar Hoog</option>
+<option value="price-high">Prijs: Hoog naar Laag</option>
+<option value="name">Naam: A-Z</option>
+</select>
+</div>
+
+<div class="filters">
+<a href="index.html">
+<button>🏠 Startpagina</button>
+</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<button onclick="filterCategory('all')">Alles</button>
+<button onclick="filterCategory('canvas')">Kunst op Canvas</button>
+<button onclick="filterCategory('tarot')">Tarot</button>
+<button onclick="filterCategory('wierrook')">Wierrook</button>
+<button onclick="filterCategory('bloemen')">Bloemen</button>
+<button onclick="filterCategory('diversen')">Diversen</button>
+
+<input type="text" id="search" placeholder="🔍 Zoek product..." onkeyup="searchProducts()">
+
+</div>
+
+<div class="container">
+
+<div class="products" id="products-grid">
+
+<!-- Producten worden hier dynamisch geladen via JavaScript -->
+
+</div>
+
+</div>
+
+<footer>
+© 2026 - Mijn Spirituele Website Julia (4-Eyes) | 
+<a href="#">Privacy Policy</a> | 
+<a href="#">Algemene Voorwaarden</a> | 
+<a href="https://github.com/">GitHub</a>
+</footer>
+
+<!-- Notificatie -->
+<div class="notification" id="notification"></div>
+
+<!-- Image Overlay -->
+<div class="image-overlay" id="imageOverlay" onclick="hideImageOverlay()">
+<div class="overlay-content" onclick="event.stopPropagation()">
+<span class="close-overlay" onclick="hideImageOverlay()">&times;</span>
+<img id="overlayImage" src="" alt="Vergrote afbeelding">
+</div>
+</div>
+
+<div class="cart" id="cart">
+
+<div class="cart-header">
+<h2>🛒 Jouw Winkelwagen</h2>
+<button onclick="toggleCart()">Sluiten</button>
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>Product</th>
+<th>Prijs</th>
+<th>Aantal</th>
+<th>Totaal</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody id="cart-items"></tbody>
+
+</table>
+
+<div class="total">
+Totaal: €<span id="total">0.00</span>
+</div>
+
+<button class="checkout" onclick="checkoutWhatsApp()">
+📱 Bestellen via WhatsApp
+</button>
+
+<button class="clear" onclick="clearCart()">
+🗑️ Leeg winkelwagen
+</button>
+
+</div>
+
+<script>
+// Product database
+const products = [
+{
+id: 1,
+name: "Canvas Onder de Lagen",
+price: 55.00,
+category: "canvas",
+image: "./Canvas-Onder-Lagen.jpg",
+description: "Dit canvas is een afdruk van de Orakel kaart, Onder de Lagen. Afmeting 60cm x 40cm. Mooi in elk huis.",
+stock: 1,
+alt: "Canvas met orakel kunst Onder de Lagen"
+},
+{
+id: 2,
+name: "Gouden Eeuw Tarot",
+price: 18.00,
+category: "tarot",
+image: "./tarot1-sm.jpg",
+description: "Prachtige tarotkaarten geïnspireerd op klassieke Nederlandse kunst.",
+stock: 3,
+alt: "Gouden Eeuw Tarot kaartenset"
+},
+{
+id: 3,
+name: "Starry Night Tarot",
+price: 8.00,
+category: "tarot",
+image: "./tarot2-sm.jpg",
+description: "Mystieke tarotset geïnspireerd door de schilderstijl van Van Gogh.",
+stock: 3,
+alt: "Starry Night Tarot kaarten"
+},
+{
+id: 3,
+name: "Wierrook Meditation",
+price: 8.50,
+category: "wierrook",
+image: "./wierrook1-sm.jpg",
+description: "Rustgevende Nag Champa wierrook perfect voor meditatie. Inhoud: Doos van 6 pakjes.",
+stock: 3,
+alt: "Nag Champa wierrook voor meditatie"
+},
+{
+id: 5,
+name: "Wierrook Festival of Flowers",
+price: 8.50,
+category: "wierrook",
+image: "./wierrook2-sm.jpg",
+description: "Bloemige wierrook voor een zachte spirituele sfeer. Inhoud: Doos van 6 pakjes.",
+stock: 3,
+alt: "Festival of Flowers wierrook"
+},
+{
+id: 6,
+name: "Bloemen met Vaas",
+price: null,
+category: "bloemen",
+image: "./bloemen-01.jpg",
+description: "Mooie decoratieve set, vaas met bloemen. Dit is een voorbeeld en wordt niet verkocht.",
+stock: 1,
+alt: "Decoratieve bloemen met vaas",
+example: true
+},
+
+    {
+id: 7,
+name: "Canvas",
+price: 55,
+category: "canvas",
+image: "./Canvas202602.jpg",
+description: "Canvas 02.",
+stock: 1,
+alt: "Canvas 02",
+example: true
+},
+
+    {
+id: 8,
+name: "Canvas 03",
+price: 55,
+category: "canvas",
+image: "./Canvas202603.jpg",
+description: "Canvas 03",
+stock: 1,
+alt: "Canvas 03",
+example: true
+},
+
+    {
+id: 9,
+name: "Canvas 04",
+price: 55,
+category: "canvas",
+image: "./Canvas202604.jpg",
+description: "Canvas 04",
+stock: 1,
+alt: "Canvas 04",
+example: true
+}
+];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let currentFilter = "all";
+let currentSort = "default";
+let searchTerm = "";
+
+// Laad producten
+function loadProducts(){
+const grid = document.getElementById("products-grid");
+grid.innerHTML = "";
+    
+let filteredProducts = [...products];
+    
+// Filter op categorie
+if(currentFilter !== "all"){
+filteredProducts = filteredProducts.filter(p => p.category === currentFilter);
+}
+    
+// Filter op zoekterm
+if(searchTerm){
+filteredProducts = filteredProducts.filter(p => 
+p.name.toLowerCase().includes(searchTerm) || 
+p.description.toLowerCase().includes(searchTerm)
+);
+}
+    
+// Sorteer producten
+filteredProducts = sortProductArray(filteredProducts, currentSort);
+    
+filteredProducts.forEach(product => {
+const productCard = createProductCard(product);
+grid.appendChild(productCard);
+});
+}
+
+// Maak product card
+function createProductCard(product){
+const div = document.createElement("div");
+div.className = "product";
+div.dataset.category = product.category;
+div.dataset.price = product.price || 0;
+div.dataset.name = product.name;
+    
+// Stock badge
+let stockHtml = "";
+if(product.stock > 0 && product.stock <= 3){
+stockHtml = `<span class="stock-badge low-stock">⚠️ Nog ${product.stock} op voorraad</span>`;
+} else if(product.stock > 0){
+stockHtml = `<span class="stock-badge">✅ Op voorraad</span>`;
+} else if(product.stock === 0 && !product.example){
+stockHtml = `<span class="stock-badge out-of-stock">❌ Uitverkocht</span>`;
+}
+    
+// Button
+let buttonHtml = "";
+if(product.example){
+buttonHtml = `<button disabled style="background:#ccc;">👀 Voorbeeld</button>`;
+} else if(product.stock === 0){
+buttonHtml = `<button disabled style="background:#f44336;">❌ Uitverkocht</button>`;
+} else {
+buttonHtml = `<button onclick="addToCart('${product.name}', ${product.price}, ${product.id})">🛒 Bestellen</button>`;
+}
+    
+// Prijs
+let priceHtml = "";
+if(product.example){
+priceHtml = '<div class="price">🎨 Voorbeeld</div>';
+} else {
+priceHtml = `<div class="price">€${product.price.toFixed(2)}</div>`;
+}
+    
+div.innerHTML = `
+<div class="product-img-container" onclick="showImageOverlay(this)" data-image="${product.image}" data-alt="${product.alt}">
+<img src="${product.image}" alt="${product.alt}" loading="lazy">
+${stockHtml}
+</div>
+<div class="product-info">
+<h3>${product.name}</h3>
+<div class="description">${product.description}</div>
+${priceHtml}
+${buttonHtml}
+</div>
+`;
+    
+return div;
+}
+
+// Sorteer functie
+function sortProductArray(products, sortType){
+const sorted = [...products];
+    
+switch(sortType){
+case "price-low":
+return sorted.sort((a,b) => (a.price || 999999) - (b.price || 999999));
+case "price-high":
+return sorted.sort((a,b) => (b.price || 0) - (a.price || 0));
+case "name":
+return sorted.sort((a,b) => a.name.localeCompare(b.name));
+default:
+return sorted;
+}
+}
+
+function sortProducts(sortType){
+currentSort = sortType;
+loadProducts();
+}
+
+// Notificatie tonen
+function showNotification(message, type = "success"){
+const notification = document.getElementById("notification");
+notification.textContent = message;
+notification.className = `notification ${type}`;
+notification.classList.add("show");
+    
+setTimeout(() => {
+notification.classList.remove("show");
+}, 3000);
+}
+
+// Winkelwagen functies
+function saveCart(){
+localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function addToCart(name, price, id){
+// Check of product op voorraad is
+const product = products.find(p => p.id === id);
+if(product && product.stock === 0){
+showNotification("❌ Dit product is uitverkocht!", "error");
+return;
+}
+    
+let item = cart.find(p => p.name === name);
+    
+if(item){
+// Check voorraad bij verhogen
+if(product && item.qty >= product.stock){
+showNotification(`⚠️ Er zijn nog maar ${product.stock} stuks beschikbaar!`, "warning");
+return;
+}
+item.qty++;
+showNotification(`✅ ${name} toegevoegd aan winkelwagen!`, "success");
+} else {
+cart.push({name, price, qty: 1, id});
+showNotification(`✅ ${name} toegevoegd aan winkelwagen!`, "success");
+}
+    
+saveCart();
+updateCart();
+}
+
+function changeQty(index, amount){
+const item = cart[index];
+const product = products.find(p => p.id === item.id);
+    
+if(amount > 0 && product && item.qty >= product.stock){
+showNotification(`⚠️ Er zijn nog maar ${product.stock} stuks beschikbaar!`, "warning");
+return;
+}
+    
+cart[index].qty += amount;
+    
+if(cart[index].qty <= 0){
+cart.splice(index, 1);
+showNotification("🗑️ Product verwijderd uit winkelwagen", "warning");
+}
+    
+saveCart();
+updateCart();
+}
+
+function removeItem(index){
+const item = cart[index];
+cart.splice(index, 1);
+saveCart();
+updateCart();
+showNotification(`🗑️ ${item.name} verwijderd`, "warning");
+}
+
+function clearCart(){
+if(cart.length === 0){
+showNotification("Winkelwagen is al leeg", "warning");
+return;
+}
+    
+if(confirm("Weet je zeker dat je de winkelwagen wilt legen?")){
+cart = [];
+saveCart();
+updateCart();
+showNotification("🗑️ Winkelwagen geleegd", "warning");
+}
+}
+
+function updateCart(){
+let cartItems = document.getElementById("cart-items");
+cartItems.innerHTML = "";
+let total = 0;
+let count = 0;
+    
+cart.forEach((item, index) => {
+let itemTotal = item.price * item.qty;
+total += itemTotal;
+count += item.qty;
+        
+let row = document.createElement("tr");
+row.innerHTML = `
+<td>${item.name}</td>
+<td>€${item.price.toFixed(2)}</td>
+<td class="qty">
+<button onclick="changeQty(${index}, -1)">-</button>
+${item.qty}
+<button onclick="changeQty(${index}, 1)">+</button>
+</td>
+<td>€${itemTotal.toFixed(2)}</td>
+<td><button onclick="removeItem(${index})" style="background:#f44336;">✕</button></td>
+`;
+cartItems.appendChild(row);
+});
+    
+document.getElementById("total").innerText = total.toFixed(2);
+document.getElementById("count").innerText = count;
+}
+
+function toggleCart(){
+document.getElementById("cart").classList.toggle("open");
+}
+
+function checkoutWhatsApp(){
+if(cart.length === 0){
+showNotification("❌ Je winkelwagen is leeg!", "error");
+return;
+}
+    
+let text = "🛒 *Bestelling van Julia's Spirituele Webwinkel:*\n\n";
+    
+cart.forEach(item => {
+text += `• ${item.name} x${item.qty} = €${(item.price * item.qty).toFixed(2)}\n`;
+});
+    
+text += `\n*Totaal: €${document.getElementById("total").innerText}*`;
+text += "\n\n📦 Afhaalpunt: ";
+text += "\n💳 Betaling: Contant / Tikkie";
+    
+window.open("https://wa.me/?text=" + encodeURIComponent(text));
+showNotification("✅ WhatsApp geopend!", "success");
+}
+
+// Filter functies
+function filterCategory(cat){
+currentFilter = cat;
+loadProducts();
+    
+// Update actieve filter visueel (optioneel)
+showNotification(`Filter: ${cat === "all" ? "Alle producten" : cat}`, "success");
+}
+
+function searchProducts(){
+searchTerm = document.getElementById("search").value.toLowerCase();
+loadProducts();
+}
+
+// Image Overlay functies
+function showImageOverlay(element){
+const imgSrc = element.dataset.image || element.querySelector('img').src;
+const imgAlt = element.dataset.alt || element.querySelector('img').alt;
+const overlay = document.getElementById('imageOverlay');
+const overlayImg = document.getElementById('overlayImage');
+    
+if(overlay && overlayImg){
+overlayImg.src = imgSrc;
+overlayImg.alt = imgAlt;
+overlay.classList.add('active');
+}
+}
+
+function hideImageOverlay(){
+const overlay = document.getElementById('imageOverlay');
+overlay.classList.remove('active');
+}
+
+// Escape toets voor overlay en cart
+document.addEventListener('keydown', function(event) {
+if(event.key === 'Escape'){
+hideImageOverlay();
+if(document.getElementById("cart").classList.contains("open")){
+toggleCart();
+}
+}
+});
+
+// Initialisatie
+loadProducts();
+updateCart();
+
+// Voeg wat extra gebruiksvriendelijkheid toe
+window.onload = function() {
+// Check of afbeeldingen bestaan (simulatie)
+console.log("🌟 Welkom bij Julia's Spirituele Webwinkel!");
+showNotification("👋 Welkom! Gebruik de filters om producten te vinden.", "success");
+};
+</script>
+
+</body>
+</html>
